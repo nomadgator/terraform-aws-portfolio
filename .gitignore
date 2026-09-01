@@ -24,3 +24,9 @@ override.tf.json
 
 # AWS CLI test output
 02-serverless-api/response.json
+
+# Project 5 Python virtual environment
+05-event-driven-system/.venv/
+
+# Project 5 Terraform-generated Lambda artifacts
+05-event-driven-system/lambda/*/function.zip
