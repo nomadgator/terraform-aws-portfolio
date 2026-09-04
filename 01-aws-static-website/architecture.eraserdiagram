@@ -1,0 +1,33 @@
+cloud-architecture-diagram
+direction right
+
+Terraform [label: "Terraform main.tf"]
+Visitor [label: "Website visitor"]
+
+AWS {
+  S3Bucket [icon: aws-simple-storage-service, label: "S3 bucket"]
+  WebsiteHosting [label: "Static website hosting: index.html"]
+  IndexObject [label: "index.html object"]
+  PublicReadPolicy [label: "Bucket policy: public s3:GetObject"]
+  PublicAccessSettings [label: "Public access block: ACLs blocked; policy allowed"]
+  Versioning [label: "Versioning enabled"]
+  Encryption [label: "Default encryption: AES256"]
+}
+
+Terraform > S3Bucket: creates
+Terraform > IndexObject: uploads website/index.html
+Terraform > WebsiteHosting: configures
+Terraform > PublicReadPolicy: attaches
+Terraform > PublicAccessSettings: configures
+Terraform > Versioning: enables
+Terraform > Encryption: configures
+
+WebsiteHosting > S3Bucket
+IndexObject > S3Bucket
+PublicReadPolicy > S3Bucket
+PublicAccessSettings > S3Bucket
+Versioning > S3Bucket
+Encryption > S3Bucket
+
+Visitor > S3Bucket: website endpoint request
+S3Bucket > Visitor: serves index.html
