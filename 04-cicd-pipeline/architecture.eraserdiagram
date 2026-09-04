@@ -1,0 +1,34 @@
+cloud-architecture-diagram
+
+GitHub {
+  GitHubRepository [label: "GitHub repository", icon: github]
+  GitHubActions [label: "GitHub Actions", icon: github-actions]
+}
+
+WebsiteStorage {
+  S3WebsiteBucket [label: "aws_s3_bucket.website", icon: aws-s3]
+  S3WebsiteConfiguration [label: "aws_s3_bucket_website_configuration.website", icon: aws-s3]
+  S3PublicAccessBlock [label: "aws_s3_bucket_public_access_block.website", icon: aws-s3]
+  S3BucketPolicy [label: "aws_s3_bucket_policy.website", icon: aws-s3]
+  S3IndexObject [label: "aws_s3_object.index", icon: aws-s3]
+}
+
+IdentityAndAccess {
+  GitHubOIDCProvider [label: "aws_iam_openid_connect_provider.github", icon: aws-iam]
+  CICDDeployPolicy [label: "aws_iam_policy.cicd_deploy", icon: aws-iam]
+  GitHubActionsRole [label: "aws_iam_role.github_actions", icon: aws-iam]
+  CICDPolicyAttachment [label: "aws_iam_role_policy_attachment.cicd_deploy", icon: aws-iam]
+}
+
+GitHubRepository > GitHubActions: push
+GitHubActions > GitHubOIDCProvider: OIDC
+S3WebsiteBucket > S3WebsiteConfiguration: id
+S3WebsiteBucket > S3PublicAccessBlock: id
+S3WebsiteBucket > S3BucketPolicy: id
+S3WebsiteBucket > S3BucketPolicy: arn
+S3PublicAccessBlock > S3BucketPolicy: depends_on
+S3WebsiteBucket > S3IndexObject: id
+S3WebsiteBucket > CICDDeployPolicy: arn
+GitHubOIDCProvider > GitHubActionsRole: arn
+GitHubActionsRole > CICDPolicyAttachment: name
+CICDDeployPolicy > CICDPolicyAttachment: arn
