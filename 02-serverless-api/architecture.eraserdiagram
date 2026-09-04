@@ -1,0 +1,32 @@
+cloud-architecture-diagram
+direction right
+
+Client [icon: user]
+
+AWS_Region [label: "AWS — ap-southeast-1"] {
+  HTTP_API [icon: aws-api-gateway, label: "API Gateway HTTP API\nterraform-serverless-api"]
+  Default_Stage [icon: aws-api-gateway, label: "$default stage\nauto deploy"]
+  Contact_Route [icon: aws-api-gateway, label: "POST /contact"]
+  Lambda_Integration [icon: aws-api-gateway, label: "AWS_PROXY integration\npayload format 2.0"]
+  Lambda_Function [icon: aws-lambda, label: "Lambda\nterraform-serverless-api\nPython 3.13"]
+  Contacts_Table [icon: aws-dynamodb, label: "DynamoDB\nterraform-serverless-contacts\nid: String | on-demand"]
+  Lambda_Role [icon: aws-iam, label: "Lambda execution role"]
+  DynamoDB_Policy [icon: aws-iam, label: "dynamodb:PutItem policy"]
+  Invoke_Permission [icon: aws-iam, label: "API Gateway invoke permission"]
+}
+
+Lambda_Archive [label: "archive_file.lambda\nlambda/ → function.zip"]
+
+Client > HTTP_API: POST /contact
+HTTP_API > Default_Stage: api_id
+HTTP_API > Contact_Route: api_id
+Contact_Route > Lambda_Integration: target
+Lambda_Integration > Lambda_Function: integration_uri
+Lambda_Function > Contacts_Table: PutItem
+
+Lambda_Archive > Lambda_Function: filename and source_code_hash
+Lambda_Role > Lambda_Function: execution role
+DynamoDB_Policy > Lambda_Role: attached role policy
+DynamoDB_Policy > Contacts_Table: permits PutItem
+HTTP_API > Invoke_Permission: source_arn
+Invoke_Permission > Lambda_Function: InvokeFunction
