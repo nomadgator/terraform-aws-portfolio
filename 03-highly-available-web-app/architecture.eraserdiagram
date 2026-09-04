@@ -1,0 +1,88 @@
+cloud-architecture-diagram
+
+direction right
+
+Network {
+	vpc_main [icon: aws-vpc]
+	subnet_public_a [icon: aws-subnet]
+	subnet_public_b [icon: aws-subnet]
+	subnet_private_a [icon: aws-subnet]
+	subnet_private_b [icon: aws-subnet]
+	internet_gateway_main [icon: aws-internet-gateway]
+	route_table_public [icon: aws-route-table]
+	route_table_private [icon: aws-route-table]
+	association_public_a [icon: aws-route-table-association]
+	association_public_b [icon: aws-route-table-association]
+	association_private_a [icon: aws-route-table-association]
+	association_private_b [icon: aws-route-table-association]
+	eip_nat [icon: aws-elastic-ip]
+	nat_gateway_main [icon: aws-nat-gateway]
+}
+
+Security {
+	security_group_alb [icon: aws-security-group]
+	security_group_ec2 [icon: aws-security-group]
+	security_group_rds [icon: aws-security-group]
+}
+
+Application {
+	ami_amazon_linux [icon: aws-ami]
+	instance_app_a [icon: aws-ec2]
+	instance_app_b [icon: aws-ec2]
+	target_group_app [icon: aws-target-group]
+	target_group_attachment_app_a [icon: aws-target-group]
+	target_group_attachment_app_b [icon: aws-target-group]
+	load_balancer_app [icon: aws-alb]
+	listener_http [icon: aws-alb]
+}
+
+Database {
+	db_subnet_group_main [icon: aws-rds]
+	db_instance_postgres [icon: aws-rds]
+}
+
+vpc_main > subnet_public_a: vpc_id
+vpc_main > subnet_public_b: vpc_id
+vpc_main > subnet_private_a: vpc_id
+vpc_main > subnet_private_b: vpc_id
+vpc_main > internet_gateway_main: vpc_id
+vpc_main > route_table_public: vpc_id
+internet_gateway_main > route_table_public: gateway_id
+subnet_public_a > association_public_a: subnet_id
+route_table_public > association_public_a: route_table_id
+subnet_public_b > association_public_b: subnet_id
+route_table_public > association_public_b: route_table_id
+eip_nat > nat_gateway_main: allocation_id
+subnet_public_a > nat_gateway_main: subnet_id
+internet_gateway_main > nat_gateway_main: depends_on
+vpc_main > route_table_private: vpc_id
+nat_gateway_main > route_table_private: nat_gateway_id
+subnet_private_a > association_private_a: subnet_id
+route_table_private > association_private_a: route_table_id
+subnet_private_b > association_private_b: subnet_id
+route_table_private > association_private_b: route_table_id
+vpc_main > security_group_alb: vpc_id
+vpc_main > security_group_ec2: vpc_id
+security_group_alb > security_group_ec2: security_groups
+vpc_main > security_group_rds: vpc_id
+security_group_ec2 > security_group_rds: security_groups
+ami_amazon_linux > instance_app_a: ami
+subnet_private_a > instance_app_a: subnet_id
+security_group_ec2 > instance_app_a: vpc_security_group_ids
+ami_amazon_linux > instance_app_b: ami
+subnet_private_b > instance_app_b: subnet_id
+security_group_ec2 > instance_app_b: vpc_security_group_ids
+vpc_main > target_group_app: vpc_id
+target_group_app > target_group_attachment_app_a: target_group_arn
+instance_app_a > target_group_attachment_app_a: target_id
+target_group_app > target_group_attachment_app_b: target_group_arn
+instance_app_b > target_group_attachment_app_b: target_id
+security_group_alb > load_balancer_app: security_groups
+subnet_public_a > load_balancer_app: subnets
+subnet_public_b > load_balancer_app: subnets
+load_balancer_app > listener_http: load_balancer_arn
+target_group_app > listener_http: target_group_arn
+subnet_private_a > db_subnet_group_main: subnet_ids
+subnet_private_b > db_subnet_group_main: subnet_ids
+db_subnet_group_main > db_instance_postgres: db_subnet_group_name
+security_group_rds > db_instance_postgres: vpc_security_group_ids
