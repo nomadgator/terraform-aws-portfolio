@@ -1,0 +1,65 @@
+cloud-architecture-diagram
+direction right
+
+DataSources {
+	data_archive_file_api_lambda [label: "data.archive_file.api_lambda", icon: file-archive]
+	data_archive_file_processor_lambda [label: "data.archive_file.processor_lambda", icon: file-archive]
+}
+
+IAM {
+	aws_iam_role_api_lambda [label: "aws_iam_role.api_lambda", icon: aws-iam-role]
+	aws_iam_role_policy_api_lambda_dynamodb [label: "aws_iam_role_policy.api_lambda_dynamodb", icon: aws-identity-and-access-management]
+	aws_iam_role_policy_api_lambda_logging [label: "aws_iam_role_policy.api_lambda_logging", icon: aws-identity-and-access-management]
+	aws_iam_role_processor_lambda [label: "aws_iam_role.processor_lambda", icon: aws-iam-role]
+	aws_iam_role_policy_processor_lambda_stream [label: "aws_iam_role_policy.processor_lambda_stream", icon: aws-identity-and-access-management]
+	aws_iam_role_policy_processor_lambda_logging [label: "aws_iam_role_policy.processor_lambda_logging", icon: aws-identity-and-access-management]
+	aws_iam_role_policy_processor_lambda_sns [label: "aws_iam_role_policy.processor_lambda_sns", icon: aws-identity-and-access-management]
+}
+
+Compute {
+	aws_lambda_function_api [label: "aws_lambda_function.api", icon: aws-lambda]
+	aws_lambda_function_processor [label: "aws_lambda_function.processor", icon: aws-lambda]
+}
+
+ApiGateway {
+	aws_apigatewayv2_api_api [label: "aws_apigatewayv2_api.api", icon: aws-api-gateway]
+	aws_apigatewayv2_integration_api_lambda [label: "aws_apigatewayv2_integration.api_lambda", icon: aws-api-gateway]
+	aws_apigatewayv2_route_event [label: "aws_apigatewayv2_route.event", icon: aws-api-gateway]
+	aws_lambda_permission_api_gateway [label: "aws_lambda_permission.api_gateway", icon: aws-lambda]
+	aws_apigatewayv2_stage_default [label: "aws_apigatewayv2_stage.default", icon: aws-api-gateway]
+}
+
+Eventing {
+	aws_dynamodb_table_events [label: "aws_dynamodb_table.events", icon: aws-dynamodb]
+	aws_lambda_event_source_mapping_dynamodb_stream [label: "aws_lambda_event_source_mapping.dynamodb_stream", icon: aws-lambda]
+	aws_sns_topic_notifications [label: "aws_sns_topic.notifications", icon: aws-simple-notification-service]
+}
+
+aws_iam_role_policy_api_lambda_dynamodb > aws_iam_role_api_lambda: aws_iam_role.api_lambda.id
+aws_iam_role_policy_api_lambda_dynamodb > aws_dynamodb_table_events: aws_dynamodb_table.events.arn
+aws_iam_role_policy_api_lambda_logging > aws_iam_role_api_lambda: aws_iam_role.api_lambda.id
+aws_iam_role_policy_processor_lambda_stream > aws_iam_role_processor_lambda: aws_iam_role.processor_lambda.id
+aws_iam_role_policy_processor_lambda_stream > aws_dynamodb_table_events: aws_dynamodb_table.events.stream_arn
+aws_iam_role_policy_processor_lambda_logging > aws_iam_role_processor_lambda: aws_iam_role.processor_lambda.id
+aws_iam_role_policy_processor_lambda_sns > aws_iam_role_processor_lambda: aws_iam_role.processor_lambda.id
+aws_iam_role_policy_processor_lambda_sns > aws_sns_topic_notifications: aws_sns_topic.notifications.arn
+
+aws_lambda_function_api > aws_iam_role_api_lambda: aws_iam_role.api_lambda.arn
+aws_lambda_function_api > data_archive_file_api_lambda: data.archive_file.api_lambda.output_path
+aws_lambda_function_api > data_archive_file_api_lambda: data.archive_file.api_lambda.output_base64sha256
+aws_lambda_function_api > aws_dynamodb_table_events: aws_dynamodb_table.events.name
+aws_lambda_function_processor > aws_iam_role_processor_lambda: aws_iam_role.processor_lambda.arn
+aws_lambda_function_processor > data_archive_file_processor_lambda: data.archive_file.processor_lambda.output_path
+aws_lambda_function_processor > data_archive_file_processor_lambda: data.archive_file.processor_lambda.output_base64sha256
+aws_lambda_function_processor > aws_sns_topic_notifications: aws_sns_topic.notifications.arn
+
+aws_apigatewayv2_integration_api_lambda > aws_apigatewayv2_api_api: aws_apigatewayv2_api.api.id
+aws_apigatewayv2_integration_api_lambda > aws_lambda_function_api: aws_lambda_function.api.invoke_arn
+aws_apigatewayv2_route_event > aws_apigatewayv2_api_api: aws_apigatewayv2_api.api.id
+aws_apigatewayv2_route_event > aws_apigatewayv2_integration_api_lambda: aws_apigatewayv2_integration.api_lambda.id
+aws_lambda_permission_api_gateway > aws_lambda_function_api: aws_lambda_function.api.function_name
+aws_lambda_permission_api_gateway > aws_apigatewayv2_api_api: aws_apigatewayv2_api.api.execution_arn
+aws_apigatewayv2_stage_default > aws_apigatewayv2_api_api: aws_apigatewayv2_api.api.id
+
+aws_lambda_event_source_mapping_dynamodb_stream > aws_dynamodb_table_events: aws_dynamodb_table.events.stream_arn
+aws_lambda_event_source_mapping_dynamodb_stream > aws_lambda_function_processor: aws_lambda_function.processor.arn
